@@ -2,6 +2,7 @@
 # flake8: noqa
 import lmdb, os, logging
 from account import Account
+from command_global import home_path
 
 logger = logging.getLogger("qcommand")
 
@@ -9,7 +10,7 @@ logger = logging.getLogger("qcommand")
 class User(object):
     def __init__(self, name):
         self.name = name
-        self.account = "./.qcommand/.account"
+        self.account = "{0}/.qcommand/account".format(home_path)
 
     def qcmd_user_list(self):
         try:
@@ -33,7 +34,7 @@ class User(object):
                 txn = env.begin()
                 val = txn.get(self.name.encode()).decode()
                 re = val.split(":")
-                os.chdir("./.qcmd")
+                os.chdir("{0}/.qcommand".format(home_path))
                 Account.account_config(self.name, re[0], re[1])
                 ret = "\nName:{0}\naccesskey:{1}\nsecretkey:{2}\n".format(self.name, re[0], re[1])
                 env.close()

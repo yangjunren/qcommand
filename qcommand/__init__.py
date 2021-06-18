@@ -2,7 +2,7 @@
 # flake8: noqa
 from .account import Account
 from .user import User
-from .command_global import Version
+from .command_global import Version, home_path
 from .listbucket import Listbucket
 from .bmodtype import Batch_modtype
 from .bchstatus import Batch_chstatus

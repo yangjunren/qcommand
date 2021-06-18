@@ -7,7 +7,7 @@ import fire, logging, os, sys
 from threading import Thread
 from account import Account
 from user import User
-from command_global import Version
+from command_global import Version, home_path
 from listbucket import Listbucket
 from bmodtype import Batch_modtype
 from bchstatus import Batch_chstatus
@@ -22,7 +22,7 @@ logger = logging.getLogger("qcommand")
 _version = Version
 
 pwd_path = os.getcwd()
-account_file = "./.qcommand/.account.json"
+account_file = "{0}/.qcommand/account.json".format(home_path)
 
 
 def read_account():
@@ -36,7 +36,7 @@ def read_account():
 class Qcommand(object):
     @staticmethod
     def account(name="", ak="", sk=""):
-        config_path = "./.qcommand"
+        config_path = "{0}/.qcommand".format(home_path)
         if os.path.exists(config_path):
             pass
         else:
