@@ -42,8 +42,8 @@ class Account(object):
                         l = f.read().split(":")
                         return print("Name:{0}\naccesskey:{1}\nsecretkey:{2}".format(l[0], l[1], l[2]))
                 else:
-                    logger.warn("Login please enter \"qcommand account -h\" for help")
+                    logger.warn("Login please enter \"qcommand account --help\" for help")
             else:
-                logger.warn("Parameter error, please enter \"qcommand account -h\" for help")
+                logger.warn("Parameter error, please enter \"qcommand account --help\" for help")
         except Exception as e:
             raise e

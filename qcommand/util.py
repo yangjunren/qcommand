@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import logging
+import logging, time
 from six import binary_type
 
 logger = logging.getLogger("qcommand")
@@ -23,3 +23,9 @@ def write_file(file_path, ret_info):
     except Exception as e:
         logger.warn(to_unicode(e))
         raise e
+
+
+def date2timestamp(date):
+    timeArray = time.strptime(date, "%Y-%m-%d")
+    timeStamp = int(time.mktime(timeArray))
+    return timeStamp

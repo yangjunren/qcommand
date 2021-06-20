@@ -63,12 +63,12 @@ qcommand listbucket upload30 upload_list.txt --prefix=2014/10/07/
 3.获取`upload30` 里面在 2021年5月1日 之后上传的文件列表：
 
 ```
-qcommand listbucket upload30 upload_list.txt --start=1619798400
+qcommand listbucket upload30 upload_list.txt --start=2021-05-01
 ```
 
-4.获取`upload30`里面 2021年5月1日 到  2021年5月31日 之间上传的文件列表
+4.获取`upload30`里面 2021年5月1日 到 2021年5月31日 之间上传的文件列表
 ```
-qcommand listbucket upload30 upload_list.txt --start=1619798400 --end=1622390400
+qcommand listbucket upload30 upload_list.txt --start=2021-05-01 --end=2021-05-31
 ```
 
 5.获取`upload30`里面`image/jpeg;image/png`类型的文件列表

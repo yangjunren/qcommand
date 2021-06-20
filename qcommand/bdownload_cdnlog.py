@@ -44,7 +44,7 @@ class Bdownload_cdnlog(object):
                 else:
                     return print("No log data")
             elif info.status_code == 401:
-                return print("access_key or secret_key error,Login please enter \"qcommand account -h\" for help")
+                return print("access_key or secret_key error,Login please enter \"qcommand account --help\" for help")
             else:
                 return print(info.text_body)
         except Exception as e:

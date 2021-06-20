@@ -2,6 +2,7 @@
 # flake8: noqa
 from qiniu import Auth
 from qiniu import BucketManager
+from util import date2timestamp
 import logging
 
 logger = logging.getLogger("qcommand")
@@ -93,6 +94,8 @@ class Listbucket(object):
     def _filter_listinfo(self, ret, file_path, start=None, end=None, fileType=None, suffix=None, fsize=False, stype=-1):
         for i in ret.get("items")[1:]:
             putTime = str(i.get("putTime"))[:10]
+            start = date2timestamp(start)
+            end = date2timestamp(end)
             if start and end is None:
                 if putTime > start:
                     self._filter_Storagetype(file_path, i, fileType, suffix, fsize, stype)
@@ -126,7 +129,7 @@ class Listbucket(object):
             try:
                 if info.status_code != 200:
                     return print(
-                        "{0},Please check accesskey and secretkey.\nLogin please enter \"qcommand account -h\" for help".format(
+                        "{0},Please check accesskey and secretkey.\nLogin please enter \"qcommand account --help\" for help".format(
                             info.text_body))
                 elif marker is None and info.status_code == 200:
                     return print("listbucket success")

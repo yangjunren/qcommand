@@ -15,6 +15,8 @@ from bdelete import Batch_delete
 from bdownload import Batch_download
 from b_m3u8_download import B_m3u8_download
 from bdownload_cdnlog import Bdownload_cdnlog
+from ts2d import ts2d
+from uploadtoken import upload_token
 
 logger = logging.getLogger("qcommand")
 
@@ -68,7 +70,7 @@ class Qcommand(object):
                 user = User(str(name))
                 user.qcmd_user_remove()
             else:
-                return "Parameter error, please enter \"qcommand user -h\" for help"
+                return "Parameter error, please enter \"qcommand user --help\" for help"
         except Exception as e:
             raise e
 
@@ -87,7 +89,7 @@ class Qcommand(object):
                 else:
                     return print("outfile:{0}  not exist".format(outfile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -109,7 +111,7 @@ class Qcommand(object):
                         os.mkdir(modtype_success_logpath)
                 if os.path.exists(modtype_success_logpath) and os.path.exists(modtype_failed_logpath):
                     if os.path.exists(inputfile):
-                        Batch = Batch_modtype(accesskey, secretkey, bucketname, inputfile, sep, successfile,
+                        Batch = Batch_modtype(accesskey, secretkey, bucket, inputfile, sep, successfile,
                                               failurefile,
                                               threadcount)
                         Batch.b_modtype()
@@ -118,7 +120,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -148,7 +150,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -177,7 +179,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -206,7 +208,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -241,7 +243,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -276,7 +278,7 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
@@ -307,10 +309,22 @@ class Qcommand(object):
                 else:
                     return print("successfile:{0} or failurefile:{1} not exist".format(successfile, failurefile))
             else:
-                return print("Login please enter \"qcommand account -h\" for help")
+                return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
             logger.warn(e)
             raise e
+
+    @staticmethod
+    def ts2d(timestamp):
+        return ts2d(timestamp)
+
+    @staticmethod
+    def uploadtoken(bucket_name, key=None, expires=3600):
+        access_key, secret_key = read_account()
+        if access_key and secret_key:
+            return upload_token(access_key, secret_key, bucket_name, key, expires)
+        else:
+            return print("Login please enter \"qcommand account --help\" for help")
 
     @staticmethod
     def version():
