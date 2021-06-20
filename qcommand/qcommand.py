@@ -3,8 +3,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-import fire, logging, os, sys
-from threading import Thread
+import fire, logging, os
 from account import Account
 from user import User
 from command_global import Version, home_path
@@ -34,8 +33,13 @@ def read_account():
 
 
 class Qcommand(object):
+    """
+
+    """
+
     @staticmethod
     def account(name="", ak="", sk=""):
+        """Get/Set AccessKey and SecretKey"""
         config_path = "{0}/.qcommand".format(home_path)
         if os.path.exists(config_path):
             pass
@@ -50,6 +54,7 @@ class Qcommand(object):
 
     @staticmethod
     def user(args, name=""):
+        """Manage users"""
         try:
             if args == "cu":
                 user = User(str(name))
@@ -70,6 +75,7 @@ class Qcommand(object):
     @staticmethod
     def listbucket(bucket, outfile, prefix=None, start=None, end=None, fileType=None,
                    suffix=None, fsize=False, stype=-1):
+        """List all the files in the bucket"""
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -87,8 +93,9 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def bmodtype(bucketname, inputfile, sep=",", successfile="{0}/bmodtype/modtype_success.txt".format(pwd_path),
+    def bmodtype(bucket, inputfile, sep=",", successfile="{0}/bmodtype/modtype_success.txt".format(pwd_path),
                  failurefile="{0}/bmodtype/modtype_failed.txt".format(pwd_path), threadcount=3):
+        """"""
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -310,34 +317,9 @@ class Qcommand(object):
         return _version
 
 
-def main_thread():
-    mainthread = Thread()
-    mainthread.start()
-    qcommand = fire.Fire(Qcommand, name="qcommand")
-    thread_ = Thread(target=qcommand)
-    thread_.start()
-    import time
-    try:
-        while True:
-            time.sleep(1)
-            if thread_.is_alive() is False:
-                break
-    except KeyboardInterrupt:
-        mainthread.stop()
-        thread_.stop()
-        sys.exit()
-
-
-def _main():
-    thread_ = Thread(target=main_thread)
-    thread_.daemon = True
-    thread_.start()
-    try:
-        while thread_.is_alive():
-            thread_.join(2)
-    except KeyboardInterrupt:
-        logger.info('exiting')
+def main():
+    fire.Fire(Qcommand, name="qcommand")
 
 
 if __name__ == '__main__':
-    _main()
+    main()

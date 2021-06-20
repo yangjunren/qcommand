@@ -34,7 +34,7 @@ class Batch_chstatus(object):
         try:
             q = Auth(self.access_key, self.secret_key)
             bucket = BucketManager(q)
-            # 2表示归档存储，1表示低频存储，0是标准存储
+            # 0表示启用，1表示禁用
             _, info = bucket.change_status(bucket_name, key, file_status, cond=None)
             return key, info, successfile, failurefile
         except Exception as e:

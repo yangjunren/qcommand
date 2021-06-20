@@ -41,12 +41,21 @@ class Listbucket(object):
 
     def _filter_suffix(self, file_path, i, fileType, suffix):
         if ";" in suffix:
-            suffix_tuple = tuple(suffix.split(";"))
-            if str(i.get("key")).endswith(suffix_tuple) and str(i.get("mimeType")) in fileType:
-                self._write_file(file_path, i)
+            if fileType:
+                suffix_tuple = tuple(suffix.split(";"))
+                if str(i.get("key")).endswith(suffix_tuple) and str(i.get("mimeType")) in fileType:
+                    self._write_file(file_path, i)
+            else:
+                suffix_tuple = tuple(suffix.split(";"))
+                if str(i.get("key")).endswith(suffix_tuple):
+                    self._write_file(file_path, i)
         else:
-            if str(i.get("key")).endswith(suffix) and str(i.get("mimeType")) in fileType:
-                self._write_file(file_path, i)
+            if fileType:
+                if str(i.get("key")).endswith(suffix) and str(i.get("mimeType")) in fileType:
+                    self._write_file(file_path, i)
+            else:
+                if str(i.get("key")).endswith(suffix):
+                    self._write_file(file_path, i)
 
     def _filter_fsize(self, file_path, i, fileType, suffix, fsize):
         """过滤大小为0的文件"""

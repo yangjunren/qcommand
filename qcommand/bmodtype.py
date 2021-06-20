@@ -42,8 +42,7 @@ class Batch_modtype(object):
         self._inner_threadpool = SimpleThreadPool(self.thread_count)
         inputfile_list = self.read_inputfile(self.inputfile)
         for i in inputfile_list:
-            if "\n" in i:
-                i = i.replace("\n", "")
+            i = i.rstrip()
             try:
                 _i = i.split(self.sep)
             except Exception as e:
