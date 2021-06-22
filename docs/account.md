@@ -7,13 +7,13 @@
 # 格式
 
 ```
-qcommand account
+qcommand account <name> <ak> <sk>
 ``` 
 
 打印当前设置的`AccessKey`, `SecretKey`和`Name`
 
 ```
-qcommand account <Your AccessKey> <Your SecretKey> <Your Account Name>
+qcommand account
 ``` 
 
 设置当前用户的`AccessKey`, `SecretKey`和`Name`, Name是用户可以任意取的名字，表示当前在本地记录的账户的名称，和在七牛注册的邮箱信息没有关系。
@@ -31,7 +31,7 @@ qcommand account <Your AccessKey> <Your SecretKey> <Your Account Name>
 1.设置当前用户的AccessKey, SecretKey, Name
 
 ```
-qcommand account ELUs327kxVPJrGCXqWae9yioc0xYZyrIpbM6Wh6x LVzZY2SqOQ_I_kM1n00ygACVBArDvOWtiLkDtKiw name_test
+qcommand account name_test dsvdsLUs327kxVPJrGCXqWae9yh6x LsdwezZY2SqOQ_ItKiwasdssdash
 ```
 
 2.输出当前用户设置的AccessKey和SecretKey
@@ -43,13 +43,13 @@ qcommand account
 
 ```
 Name: name_test
-AccessKey: ELUs327kxVPJrGCXqWae9yioc0xYZyrIpbM6Wh6x
-SecretKey: LVzZY2SqOQ_I_kM1n00ygACVBArDvOWtiLkDtKiw
+AccessKey: dsvdsLUs327kxVPJrGCXqWae9yh6x
+SecretKey: LsdwezZY2SqOQ_ItKiwasdssdash
 ```
 
 3. 我们可以在设置name_test账户后，继续添加一个账户
 
 ```
-qcommand account ELUs327kxVPJrGCXqWae9yioc0xYZyrIpbM6abc LVzZY2SqOQ_I_kM1n00ygACVBArDvOWtiLkDthaha name_test2
+qcommand account name_test2 sfssfcsdoc0xYZyrIpbM6abc sfcsfsfafVBArDvOWtiLkDthaha
 ```
 qcommand 可以记录多个设置的账户信息，账户的管理，切换，删除等，可以参考qcommand user命令[文档](docs/user.md)
