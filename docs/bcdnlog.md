@@ -28,6 +28,6 @@ qcommand bcdnlog <date> <domains> <savedir> [--successfile= --failurefile= --thr
 下载`123.qiniu.com;345.test.com`2个域名`2016-07-01`的访问日志，并保存在 ./cdn_download 目录下。
 
 ```
-qcommand bcdnlog 123.qiniu.com;345.test.com ./cdn_download
+qcommand bcdnlog 2016-07-01 123.qiniu.com;345.test.com ./cdn_download
 ```
 
