@@ -94,8 +94,6 @@ class Listbucket(object):
     def _filter_listinfo(self, ret, file_path, start=None, end=None, fileType=None, suffix=None, fsize=False, stype=-1):
         for i in ret.get("items")[1:]:
             putTime = str(i.get("putTime"))[:10]
-            start = date2timestamp(start)
-            end = date2timestamp(end)
             if start and end is None:
                 if putTime > start:
                     self._filter_Storagetype(file_path, i, fileType, suffix, fsize, stype)
@@ -107,9 +105,10 @@ class Listbucket(object):
             else:
                 self._filter_Storagetype(file_path, i, fileType, suffix, fsize, stype)
 
-    def _list(self, access_key, secret_key, bucket_name, file_path, prefix, start, end, fileType, suffix, limit=1000,
-              delimiter=None,
-              marker=None, fsize=False, stype=-1):
+    def _list(self, access_key, secret_key, bucket_name, file_path, prefix, start, end, fileType, suffix, fsize=False,
+              stype=-1,
+              marker=None, limit=1000,
+              delimiter=None):
         q = Auth(access_key, secret_key)
         bucket = BucketManager(q)
         ret, eof, info = bucket.list(bucket_name, prefix, marker, limit, delimiter)
@@ -136,8 +135,18 @@ class Listbucket(object):
                 else:
                     ret, marker_new, info = self._list(self.access_key, self.secret_key, self.bucket, self.file_path,
                                                        self.prefix, self.start, self.end,
-                                                       self.fileType, self.suffix, self.fsize, self.stype)
+                                                       self.fileType, self.suffix, self.fsize, self.stype, marker)
                 marker = marker_new
             except Exception as e:
                 logger.wran(e)
                 raise e
+
+
+if __name__ == '__main__':
+    accesskey = "********"
+    secretkey = "********"
+    bucket = "********"
+    outfile = "./123.txt"
+    listBucket = Listbucket(accesskey, secretkey, bucket, outfile, prefix=None, start=None, end=None, fileType=None,
+                            suffix=None, fsize=False, stype=-1)
+    listBucket.listBucket()

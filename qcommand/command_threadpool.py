@@ -55,9 +55,24 @@ class WorkerThread(Thread):
             succ_info = "success {0} ----> {1}/{2}".format(filename, save_path, local_filename)
             self._ret.append(ret.text)
             write_file(successfile, succ_info)
+            return print(succ_info)
         else:
             self._fail_task_num += 1
             fail_info = "failed {0} ----> {1} {2}".format(filename, ret.status_code, ret.text)
+            write_file(failurefile, fail_info)
+            return print(fail_info)
+
+    def _b_m3u8_download_args(self, result_args):
+        status_code, response, filename, local_filename_path, successfile, failurefile = result_args
+        if status_code == 200:
+            self._succ_task_num += 1
+            succ_info = "success {0} ----> {1}".format(filename, local_filename_path)
+            self._ret.append(response)
+            write_file(successfile, succ_info)
+            return print(succ_info)
+        else:
+            self._fail_task_num += 1
+            fail_info = "failed {0} ----> {1} {2}".format(filename, status_code, response)
             write_file(failurefile, fail_info)
             return print(fail_info)
 
@@ -68,11 +83,13 @@ class WorkerThread(Thread):
                 return
             try:
                 result_args = func(*args, **kwargs)
-                if len(result_args) == 4:
+                if result_args and len(result_args) == 4:
                     self._bchstatus_bmodtype_args(result_args)
-                elif len(result_args) == 5:
+                elif result_args and len(result_args) == 5:
                     self._bupload_args(result_args)
-                elif len(result_args) == 7:
+                elif result_args and len(result_args) == 6:
+                    self._b_m3u8_download_args(result_args)
+                elif result_args and len(result_args) == 7:
                     self._bdownload_args(result_args)
 
             except Exception as e:
@@ -110,7 +127,7 @@ class SimpleThreadPool:
 
     def release(self):
         while self._queue.empty() is False:
-            time.sleep(1)
+            time.sleep(5)
 
     def wait_completion(self):
         self._queue.join()

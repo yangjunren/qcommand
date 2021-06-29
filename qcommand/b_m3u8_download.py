@@ -26,7 +26,7 @@ class B_m3u8_download(object):
 
     def get_ts_list(self, file_url):
         ts_list = m3u8.load(file_url)
-        return ts_list
+        return ts_list.files
 
     def file_url(self, filename):
         if self.private:
@@ -50,10 +50,10 @@ class B_m3u8_download(object):
                         hls_list.append(filename)
                         for file_name in hls_list:
                             file_url = self.file_url(file_name)
-                            self._inner_threadpool.add_task(Batch_download.download, file_url, filename, self.save_path,
-                                                            self._http_headers,
-                                                            self.successfile, self.failurefile)
-
+                            b_download = Batch_download()
+                            self._inner_threadpool.add_task(b_download.simple_download, file_url, file_name,
+                                                            self.save_path, self._http_headers, self.successfile,
+                                                            self.failurefile)
                     except Exception as e:
                         logger.warn(to_unicode(e))
                 self._inner_threadpool.wait_completion()
@@ -62,3 +62,18 @@ class B_m3u8_download(object):
         except Exception as e:
             logger.warn(to_unicode(e))
             raise e
+
+
+if __name__ == '__main__':
+    accesskey = "************"
+    secretkey = "************"
+    domain = "qb8z8byyd.bkt.clouddn.com"
+    inputfile = "./qcommand_test/123.txt"
+    savedir = "./Downloads/qcommand_test"
+    private = False
+    http_headers = {}
+    successfile = "./successfile.txt"
+    failurefile = "./failurefile.txt"
+    Batch = B_m3u8_download(accesskey, secretkey, domain, inputfile, savedir, http_headers, private, successfile,
+                            failurefile, thread_count=3)
+    Batch.batch_m3u8_download()

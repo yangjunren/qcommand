@@ -31,7 +31,7 @@ def read_account():
         ret = f.read().split(":")
         accesskey = ret[1]
         secretkey = ret[2]
-    return accesskey, secretkey
+    return str(accesskey), str(secretkey)
 
 
 class Qcommand(object):
@@ -234,10 +234,10 @@ class Qcommand(object):
                         os.mkdir(download_success_logpath)
                 if os.path.exists(download_success_logpath) and os.path.exists(download_failed_logpath):
                     if os.path.exists(inputfile) and os.path.exists(savedir):
-                        Batch = Batch_download(accesskey, secretkey, domain, inputfile, savedir, http_headers, private,
-                                               successfile, failurefile,
-                                               threadcount)
-                        Batch.batch_download()
+                        Batch = Batch_download()
+                        Batch.batch_download(accesskey, secretkey, domain, inputfile, savedir, http_headers, private,
+                                             successfile, failurefile,
+                                             threadcount)
                     else:
                         return print("inputfile:{0} or savedir:{1} not exist".format(inputfile, savedir))
                 else:

@@ -5,7 +5,7 @@ from util import write_file, to_unicode
 from bdownload import Batch_download
 from command_threadpool import SimpleThreadPool
 import logging
-from os import mkdir, path
+from os import mkdir, path, chdir, rename
 
 logger = logging.getLogger("qcommand")
 
@@ -27,20 +27,29 @@ class Bdownload_cdnlog(object):
         self._http_headers = {}
 
     def url_list(self, domains, ret, info):
-        result = False
+        res = False
         try:
             if info.status_code == 200:
                 if ret["data"]:
                     log_data = ret["data"]
                     for domain in domains:
+                        domain_path = "{0}/{1}".format(self.save_path, domain)
+                        if path.exists(domain_path):
+                            pass
+                        else:
+                            mkdir(domain_path)
                         for i in log_data[domain]:
                             log_name = i["name"].split("/")[1]
                             log_url = i["url"]
-                            write_file("{0}/{1}.txt".format(self.save_path, domain),
+                            write_file("{0}/{1}.txt".format(domain_path, domain),
                                        "{0},{1}\n".format(log_name, log_url))
-                        mkdir("{0}/{1}".format(self.save_path, domain))
-                        _cdnlog_fileinfo.append("{0}/{1}/{2}.txt".format(self.save_path, domain, domain))
-                    result = True
+                        rename("{0}/{1}.txt".format(domain_path, domain),
+                               "{0}/{1}_download.txt".format(domain_path, domain))
+                        if "{0}/{1}_download.txt".format(domain_path, domain) in _cdnlog_fileinfo:
+                            pass
+                        else:
+                            _cdnlog_fileinfo.append("{0}/{1}_download.txt".format(domain_path, domain))
+                    res = True
                 else:
                     return print("No log data")
             elif info.status_code == 401:
@@ -50,16 +59,16 @@ class Bdownload_cdnlog(object):
         except Exception as e:
             logger.warn(to_unicode(e))
         finally:
-            return result
+            return res
 
     def get_cdnlog_url(self):
+        if ";" in self.cdn_domain:
+            domains = self.cdn_domain.split(";")
+        else:
+            domains = [self.cdn_domain]
         try:
             auth = Auth(self.access_key, self.secret_key)
             cdn_manager = CdnManager(auth)
-            if ";" in self.cdn_domain:
-                domains = self.cdn_domain.split(";")
-            else:
-                domains = [].append(self.cdn_domain)
             ret, info = cdn_manager.get_log_list_data(domains, self.log_date)
             return self.url_list(domains, ret, info)
         except Exception as e:
@@ -68,20 +77,28 @@ class Bdownload_cdnlog(object):
     def batch_download_cdnlog(self):
         self._inner_threadpool = SimpleThreadPool(self.thread_count)
         try:
-            if self.get_cdnlog_url and len(_cdnlog_fileinfo) > 0:
+            chdir(self.save_path)
+            res = self.get_cdnlog_url()
+            if res and len(_cdnlog_fileinfo) > 0:
                 for cdnlog_file in _cdnlog_fileinfo:
+                    if path.exists(path.dirname(cdnlog_file)):
+                        pass
+                    else:
+                        mkdir(path.dirname(cdnlog_file))
                     with open(cdnlog_file, "r") as f:
                         for file_info in f:
-                            file_info = file_info.rstrip()
-                            filename = file_info.split(",")[0]
-                            file_url = file_info.split(",")[1]
                             try:
+                                file_info = file_info.rstrip()
+                                if len(file_info) > 0:
+                                    filename = file_info.split(",")[0]
+                                    file_url = file_info.split(",")[1]
+                                else:
+                                    pass
                                 save_path = path.dirname(cdnlog_file)
-                                self._inner_threadpool.add_task(Batch_download.download, file_url, filename,
-                                                                save_path,
-                                                                self._http_headers,
-                                                                self.successfile, self.failurefile)
-
+                                b_download = Batch_download()
+                                self._inner_threadpool.add_task(b_download.asycnc_download, file_url, filename,
+                                                                save_path, self._http_headers, self.successfile,
+                                                                self.failurefile)
                             except Exception as e:
                                 logger.warn(to_unicode(e))
                         self._inner_threadpool.wait_completion()
@@ -92,3 +109,16 @@ class Bdownload_cdnlog(object):
         except Exception as e:
             logger.warn(to_unicode(e))
             raise e
+
+
+if __name__ == '__main__':
+    access_key = "********"
+    secret_key = "********"
+    domains = "********"
+    date = "********"
+    savedir = "./Downloads"
+    successfile = "./successfile.txt"
+    failurefile = "./failurefile.txt"
+    Batch = Bdownload_cdnlog(access_key, secret_key, domains, date, savedir, successfile, failurefile, thread_count=3)
+    ret = Batch.batch_download_cdnlog()
+    print(ret)
