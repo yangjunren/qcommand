@@ -16,7 +16,7 @@ qcommand 工具使用python3实现的一个方便使用七牛API服务的命令�
 | -------------- | --------------------------|----------------------------------|
 |v0.0 | kodo、cdn相关命令|[下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.0/mac_os/qcommand)|
 |v0.1| 新增 kodo 数据统计查询命令 |[下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.1/mac_os/qcommand)|
-
+|v0.2| 新增 kodo 数据统计查询 结果导出功能| [下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.2/mac_os/qcommand)|
 
 ## 安装
 
