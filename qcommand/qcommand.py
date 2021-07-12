@@ -17,6 +17,8 @@ from b_m3u8_download import B_m3u8_download
 from bdownload_cdnlog import Bdownload_cdnlog
 from ts2d import ts2d
 from uploadtoken import upload_token
+from qiniu import QiniuMacAuth
+from bucket_statistic import bucket_Btatistic
 
 logger = logging.getLogger("qcommand")
 
@@ -35,13 +37,14 @@ def read_account():
 
 
 class Qcommand(object):
-    """
-
-    """
-
     @staticmethod
     def account(name="", ak="", sk=""):
-        """Get/Set AccessKey and SecretKey"""
+        """
+        登录七牛账号
+        name: 账户的名字, 可以任意取，和在七牛注册的邮箱信息没有关系， 只是qcommand本地用来标示<ak, sk>对
+        ak: 七牛账号对应的AccessKey，查看地址：https://portal.qiniu.com/user/key
+        sk: 七牛账号对应的SecretKey，查看地址：https://portal.qiniu.com/user/key
+        """
         config_path = "{0}/.qcommand".format(home_path)
         if os.path.exists(config_path):
             pass
@@ -56,7 +59,11 @@ class Qcommand(object):
 
     @staticmethod
     def user(args, name=""):
-        """Manage users"""
+        """
+        管理本地用户信息
+        args: cu 切换当前的账户，ls 列出所有本地的账户信息，remove 移除特定用户
+        name: 账户的名字, qcommand 登录七牛账号时指定的名字。
+        """
         try:
             if args == "cu":
                 user = User(str(name))
@@ -77,7 +84,18 @@ class Qcommand(object):
     @staticmethod
     def listbucket(bucket, outfile, prefix=None, start=None, end=None, fileType=None,
                    suffix=None, fsize=False, stype=-1):
-        """List all the files in the bucket"""
+        """
+        获取七牛空间里面的文件列表，可以指定文件前缀获取指定的文件列表，如果不指定，则获取所有文件的列表。
+        bucket: 空间名称，可以为私有空间或者公开空间名称
+        outfile: 获取的文件列表保存在本地的文件名
+        prefix: 七牛空间中文件名的前缀，该参数为可选参数，如果不指定则获取空间中所有的文件列表
+        start: 开始时间，该参数为可选参数，指定后表示列举start时间之后上传的文件，如果不指定则获取空间中所有的文件列表
+        end: 结束时间，该参数为可选参数，指定后表示列举end时间之前上传的文件，如果不指定则获取空间中所有的文件列表
+        fileType: 七牛空间中文件类型，该参数为可选参数，指定后列举指定类型的文件，如果不指定则获取空间中所有的文件列表
+        suffix: 七牛空间中文件名的后缀，该参数为可选参数，指定后列举指定后缀的文件，如果不指定则获取空间中所有的文件列表
+        fsize: 七牛空间中文件大小，该参数为可选参数，指定后列举指定大小的文件，如果不指定则获取空间中所有的文件列表
+        stype: 七牛空间中文件的存储类型（0 表示标准存储；1 表示低频存储；2 表示归档存储），该参数为可选参数，如果不指定则获取空间中所有的文件列表
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -97,7 +115,15 @@ class Qcommand(object):
     @staticmethod
     def bmodtype(bucket, inputfile, sep=",", successfile="{0}/bmodtype/modtype_success.txt".format(pwd_path),
                  failurefile="{0}/bmodtype/modtype_failed.txt".format(pwd_path), threadcount=3):
-        """"""
+        """
+        批量修改空间中的文件 存储类型。
+        bucket: 空间名称，可以为公开空间或者私有空间
+        inputfile: 包含文件名和存储类型的txt文件
+        sep: inputfile 文件中 需要修改存储类型的文件名与存储类型（0 表示标准存储；1 表示低频存储；2 表示归档存储）之间的分割符（默认是,分割）
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bmodtype 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bmodtype 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -128,6 +154,15 @@ class Qcommand(object):
     @staticmethod
     def bchstatus(bucket, inputfile, sep=",", successfile="{0}/bchstatus/chstatus_success.txt".format(pwd_path),
                   failurefile="{0}/bchstatus/chstatus_failed.txt".format(pwd_path), threadcount=3):
+        """
+        批量修改文件状态（0表示启用，1表示禁用）
+        bucket: 空间名称，可以为公开空间或者私有空间
+        inputfile: 包含文件名和文件状态的txt文件
+        sep: inputfile 文件中 需要修改存储类型的文件名与存储类型（0 表示标准存储；1 表示低频存储；2 表示归档存储）之间的分割符（默认是,分割）。
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bchstatus 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bchstatus 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -158,6 +193,14 @@ class Qcommand(object):
     @staticmethod
     def bupload(bucket, dir, successfile="{0}/bupload/upload_success.txt".format(pwd_path),
                 failurefile="{0}/bupload/upload_failed.txt".format(pwd_path), threadcount=3):
+        """
+        批量上传文件
+        bucket: 空间名称，可以为公开空间或者私有空间
+        dir: 需要上传的文件目录
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的bupload目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的bupload目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -187,6 +230,14 @@ class Qcommand(object):
     @staticmethod
     def bdelete(bucket, inputfile, successfile="{0}/bdelete/delete_success.txt".format(pwd_path),
                 failurefile="{0}/bdelete/delete_failed.txt".format(pwd_path), threadcount=3):
+        """
+        批量删除文件
+        bucket: 空间名称，可以为公开空间或者私有空间
+        inputfile: 包含文件名的txt文件
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bdelete 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bdelete 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -217,6 +268,17 @@ class Qcommand(object):
     def bdownload(domain, inputfile, savedir, referer=None, private=False,
                   successfile="{0}/bdownload/download_success.txt".format(pwd_path),
                   failurefile="{0}/bdownload/download_failed.txt".format(pwd_path), threadcount=3):
+        """
+        批量下载空间文件
+        domain: 空间绑定的域名，可以为公开空间或者私有空间
+        inputfile: 包含文件名的txt文件
+        savedir: 文件保存路径
+        referer: referer参数，domain域名开启referer白名单的情况下设置，设置一个白名单中的域名即可
+        private: 空间属性，bool类型，默认为False（公开空间），私有空间的话置为True
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bdownload 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bdownload 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -252,6 +314,17 @@ class Qcommand(object):
     def bm3u8(domain, inputfile, savedir, referer=None, private=False,
               successfile="{0}/bm3u8download/download_success.txt".format(pwd_path),
               failurefile="{0}/bm3u8download/download_failed.txt".format(pwd_path), threadcount=3):
+        """
+        下载m3u8文件
+        domain: 空间绑定的域名，可以为公开空间或者私有空间
+        inputfile: 包含m3u8文件名的txt文件
+        savedir: 文件保存路径
+        referer: referer参数，domain域名开启referer白名单的情况下设置，设置一个白名单中的域名即可
+        private: 空间属性，bool类型，默认为False（公开空间），私有空间的话置为True
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bm3u8download 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bm3u8download 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -287,6 +360,15 @@ class Qcommand(object):
     def bcdnlog(date, domains, savedir,
                 successfile="{0}/bcdnlogdownload/download_success.txt".format(pwd_path),
                 failurefile="{0}/bcdnlogdownload/download_failed.txt".format(pwd_path), threadcount=3):
+        """
+        下载CDN日志
+        date: 日期，例如 2016-07-01
+        domains: 域名，多个域名用;分割，示例 123.qiniu.com;345.test.com
+        savedir: 文件保存路径
+        successfile: 处理成功的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bcdnlogdownload 目录下
+        failurefile: 处理失败的文件记录，可选参数，不指定，默认保存在 qcommand 运行目录的 bcdnlogdownload 目录下
+        threadcount: 并发数，可选参数，默认值为3
+        """
         try:
             if os.path.exists(account_file):
                 accesskey, secretkey = read_account()
@@ -316,15 +398,308 @@ class Qcommand(object):
 
     @staticmethod
     def ts2d(timestamp):
+        """
+        时间戳转日期
+        timestamp: 时间戳，单位：秒。
+        """
         return ts2d(timestamp)
 
     @staticmethod
     def uploadtoken(bucket_name, key=None, expires=3600):
+        """
+        获取上传token
+        bucket_name: 空间名
+        key: 文件名，可选参数。
+        expires: token有效期，默认有效期 3600秒
+        """
         access_key, secret_key = read_account()
         if access_key and secret_key:
             return upload_token(access_key, secret_key, bucket_name, key, expires)
         else:
             return print("Login please enter \"qcommand account --help\" for help")
+
+    @staticmethod
+    def space(begin, end, g, bucket=None, region=None):
+        """
+        获取标准存储的存储量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_space(begin=begin, end=end, g=g, bucket=bucket, region=region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def count(begin, end, g, bucket=None, region=None):
+        """
+        获取标准存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_count(begin=begin, end=end, g=g, bucket=bucket, region=region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def spaceline(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+        """
+        获取低频存储的当前存储量。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        no_predel: 除去低频存储提前删除，剩余的存储量。可选参数，默认为 False，包含提前删除存储量。置为True时，不包含提前删除存储量。
+        only_predel: 只显示低频存储提前删除的存储量。可选参数，默认为 False，显示所有存储量。置为True时，只显示提前删除存储量。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_space_line(begin=begin, end=end, g=g, bucket=bucket, region=region, no_predel=no_predel,
+                                        only_predel=only_predel)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def countline(begin, end, g, bucket=None, region=None):
+        """
+        获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_count_line(begin=begin, end=end, g=g, bucket=bucket, region=region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def spacearchive(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+        """
+        获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        no_predel: 除去归档存储提前删除，剩余的存储量。可选参数，默认为 False，包含提前删除存储量。置为True时，不包含提前删除存储量。
+        only_predel: 只显示归档存储提前删除的存储量。可选参数，默认为 False，显示所有存储量。置为True时，只显示提前删除存储量。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_space_archive(begin=begin, end=end, g=g, bucket=bucket, region=region, no_predel=no_predel,
+                                           only_predel=only_predel)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def countarchive(begin, end, g, bucket=None, region=None):
+        """
+        获取归档存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
+        region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.bucket_count_archive(begin=begin, end=end, g=g, bucket=bucket, region=region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def blobtransfer(begin, end, g, is_oversea=None, taskid=None):
+        """
+        获取跨区域同步流量统计数据。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        is_oversea: 是否为海外同步,0 国内,1 海外。可选参数，不填表示查询总跨区域同步流量
+        taskid: 任务 id。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.blob_transfer(begin=begin, end=end, g=g, is_oversea=is_oversea, taskid=taskid)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def rschtype(begin, end, g, new_bucket=None, new_region=None):
+        """
+        获取存储类型请求次数统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
+        new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.rs_chtype(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def rsput(begin, end, g, new_bucket=None, ftype=None, new_region=None):
+        """
+        获取 PUT 请求次数。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
+        ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
+        new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.rs_put(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region, ftype=ftype)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def internet_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+        """
+        获取外网流出流量。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
+        domain: 空间访问域名。可选参数
+        ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
+        new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.internet_traffic_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
+                                               ftype=ftype,
+                                               new_region=new_region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def cdn_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+        """
+        获取CDN回源流量统计。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
+        domain: 空间访问域名。可选参数
+        ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
+        new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.cdn_traffic_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
+                                          ftype=ftype,
+                                          new_region=new_region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def req_num(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+        """
+        获取下载请求次数。可查询当天计量，统计延迟大概 5 分钟。
+        begin: 起始日期字符串，闭区间，例如： 20060102150405
+        end: 结束日期字符串，开区间，例如： 20060102150405
+        g: 时间粒度，支持 day；当天支持5min、hour、day
+        new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
+        domain: 空间访问域名。可选参数
+        ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
+        new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        """
+        try:
+            if os.path.exists(account_file):
+                access_key, secret_key = read_account()
+                auth = QiniuMacAuth(access_key, secret_key)
+                space = bucket_Btatistic(auth)
+                space.req_num_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
+                                      ftype=ftype,
+                                      new_region=new_region)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
 
     @staticmethod
     def version():
