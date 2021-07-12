@@ -3,7 +3,10 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-import fire, logging, os
+import fire
+from logging import getLogger
+from os import mkdir, getcwd
+from os.path import exists, split
 from account import Account
 from user import User
 from command_global import Version, home_path
@@ -20,11 +23,11 @@ from uploadtoken import upload_token
 from qiniu import QiniuMacAuth
 from bucket_statistic import bucket_Btatistic
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 _version = Version
 
-pwd_path = os.getcwd()
+pwd_path = getcwd()
 account_file = "{0}/.qcommand/account.json".format(home_path)
 
 
@@ -46,10 +49,10 @@ class Qcommand(object):
         sk: 七牛账号对应的SecretKey，查看地址：https://portal.qiniu.com/user/key
         """
         config_path = "{0}/.qcommand".format(home_path)
-        if os.path.exists(config_path):
+        if exists(config_path):
             pass
         else:
-            os.mkdir(config_path)
+            mkdir(config_path)
         try:
             account = Account(str(name), str(ak), str(sk))
             account.qcmd_account(config_path)
@@ -97,9 +100,9 @@ class Qcommand(object):
         stype: 七牛空间中文件的存储类型（0 表示标准存储；1 表示低频存储；2 表示归档存储），该参数为可选参数，如果不指定则获取空间中所有的文件列表
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                if os.path.exists(outfile):
+                if exists(outfile):
                     listBucket = Listbucket(accesskey, secretkey, bucket, outfile, prefix, start, end, fileType, suffix,
                                             fsize,
                                             stype)
@@ -125,18 +128,18 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                modtype_success_logpath = os.path.split(successfile)[0]
-                modtype_failed_logpath = os.path.split(failurefile)[0]
+                modtype_success_logpath = split(successfile)[0]
+                modtype_failed_logpath = split(failurefile)[0]
                 if modtype_success_logpath == "{0}/bmodtype".format(
                         pwd_path) and modtype_failed_logpath == "{0}/bmodtype".format(pwd_path):
-                    if os.path.exists("{0}/bmodtype".format(pwd_path)):
+                    if exists("{0}/bmodtype".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(modtype_success_logpath)
-                if os.path.exists(modtype_success_logpath) and os.path.exists(modtype_failed_logpath):
-                    if os.path.exists(inputfile):
+                        mkdir(modtype_success_logpath)
+                if exists(modtype_success_logpath) and exists(modtype_failed_logpath):
+                    if exists(inputfile):
                         Batch = Batch_modtype(accesskey, secretkey, bucket, inputfile, sep, successfile,
                                               failurefile,
                                               threadcount)
@@ -164,18 +167,18 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                chstatus_success_logpath = os.path.split(successfile)[0]
-                chstatus_failed_logpath = os.path.split(failurefile)[0]
+                chstatus_success_logpath = split(successfile)[0]
+                chstatus_failed_logpath = split(failurefile)[0]
                 if chstatus_success_logpath == "{0}/bchstatus".format(
                         pwd_path) and chstatus_failed_logpath == "{0}/bchstatus".format(pwd_path):
-                    if os.path.exists("{0}/bchstatus".format(pwd_path)):
+                    if exists("{0}/bchstatus".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(chstatus_success_logpath)
-                if os.path.exists(chstatus_success_logpath) and os.path.exists(chstatus_failed_logpath):
-                    if os.path.exists(inputfile):
+                        mkdir(chstatus_success_logpath)
+                if exists(chstatus_success_logpath) and exists(chstatus_failed_logpath):
+                    if exists(inputfile):
                         Batch = Batch_chstatus(accesskey, secretkey, bucket, inputfile, sep, successfile,
                                                failurefile,
                                                threadcount)
@@ -202,18 +205,18 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                upload_success_logpath = os.path.split(successfile)[0]
-                upload_failed_logpath = os.path.split(failurefile)[0]
+                upload_success_logpath = split(successfile)[0]
+                upload_failed_logpath = split(failurefile)[0]
                 if upload_success_logpath == "{0}/bupload".format(
                         pwd_path) and upload_failed_logpath == "{0}/bupload".format(pwd_path):
-                    if os.path.exists("{0}/bupload".format(pwd_path)):
+                    if exists("{0}/bupload".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(upload_success_logpath)
-                if os.path.exists(upload_success_logpath) and os.path.exists(upload_failed_logpath):
-                    if os.path.exists(dir):
+                        mkdir(upload_success_logpath)
+                if exists(upload_success_logpath) and exists(upload_failed_logpath):
+                    if exists(dir):
                         Batch = Batch_upload(accesskey, secretkey, dir, bucket, successfile, failurefile,
                                              threadcount)
                         Batch.batch_upload()
@@ -239,18 +242,18 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                upload_success_logpath = os.path.split(successfile)[0]
-                upload_failed_logpath = os.path.split(failurefile)[0]
+                upload_success_logpath = split(successfile)[0]
+                upload_failed_logpath = split(failurefile)[0]
                 if upload_success_logpath == "{0}/bdelete".format(
                         pwd_path) and upload_failed_logpath == "{0}/bdelete".format(pwd_path):
-                    if os.path.exists("{0}/bdelete".format(pwd_path)):
+                    if exists("{0}/bdelete".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(upload_success_logpath)
-                if os.path.exists(upload_success_logpath) and os.path.exists(upload_failed_logpath):
-                    if os.path.exists(inputfile):
+                        mkdir(upload_success_logpath)
+                if exists(upload_success_logpath) and exists(upload_failed_logpath):
+                    if exists(inputfile):
                         Batch = Batch_delete(accesskey, secretkey, bucket, inputfile, successfile, failurefile,
                                              threadcount)
                         Batch.batch_delete()
@@ -280,22 +283,22 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
                 if referer:
                     http_headers = {"Referer": "http://{0}/".format(referer)}
                 else:
                     http_headers = {}
-                download_success_logpath = os.path.split(successfile)[0]
-                download_failed_logpath = os.path.split(failurefile)[0]
+                download_success_logpath = split(successfile)[0]
+                download_failed_logpath = split(failurefile)[0]
                 if download_success_logpath == "{0}/bdownload".format(
                         pwd_path) and download_failed_logpath == "{0}/bdownload".format(pwd_path):
-                    if os.path.exists("{0}/bdownload".format(pwd_path)):
+                    if exists("{0}/bdownload".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(download_success_logpath)
-                if os.path.exists(download_success_logpath) and os.path.exists(download_failed_logpath):
-                    if os.path.exists(inputfile) and os.path.exists(savedir):
+                        mkdir(download_success_logpath)
+                if exists(download_success_logpath) and exists(download_failed_logpath):
+                    if exists(inputfile) and exists(savedir):
                         Batch = Batch_download()
                         Batch.batch_download(accesskey, secretkey, domain, inputfile, savedir, http_headers, private,
                                              successfile, failurefile,
@@ -326,22 +329,22 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
                 if referer:
                     http_headers = {"Referer": "http://{0}/".format(referer)}
                 else:
                     http_headers = {}
-                download_success_logpath = os.path.split(successfile)[0]
-                download_failed_logpath = os.path.split(failurefile)[0]
+                download_success_logpath = split(successfile)[0]
+                download_failed_logpath = split(failurefile)[0]
                 if download_success_logpath == "{0}/bm3u8download".format(
                         pwd_path) and download_failed_logpath == "{0}/bm3u8download".format(pwd_path):
-                    if os.path.exists("{0}/bm3u8download".format(pwd_path)):
+                    if exists("{0}/bm3u8download".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(download_success_logpath)
-                if os.path.exists(download_success_logpath) and os.path.exists(download_failed_logpath):
-                    if os.path.exists(inputfile) and os.path.exists(savedir):
+                        mkdir(download_success_logpath)
+                if exists(download_success_logpath) and exists(download_failed_logpath):
+                    if exists(inputfile) and exists(savedir):
                         Batch = B_m3u8_download(accesskey, secretkey, domain, inputfile, savedir, http_headers, private,
                                                 successfile, failurefile,
                                                 threadcount)
@@ -370,18 +373,18 @@ class Qcommand(object):
         threadcount: 并发数，可选参数，默认值为3
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 accesskey, secretkey = read_account()
-                download_success_logpath = os.path.split(successfile)[0]
-                download_failed_logpath = os.path.split(failurefile)[0]
+                download_success_logpath = split(successfile)[0]
+                download_failed_logpath = split(failurefile)[0]
                 if download_success_logpath == "{0}/bcdnlogdownload".format(
                         pwd_path) and download_failed_logpath == "{0}/bcdnlogdownload".format(pwd_path):
-                    if os.path.exists("{0}/bcdnlogdownload".format(pwd_path)):
+                    if exists("{0}/bcdnlogdownload".format(pwd_path)):
                         pass
                     else:
-                        os.mkdir(download_success_logpath)
-                if os.path.exists(download_success_logpath) and os.path.exists(download_failed_logpath):
-                    if os.path.exists(savedir):
+                        mkdir(download_success_logpath)
+                if exists(download_success_logpath) and exists(download_failed_logpath):
+                    if exists(savedir):
                         Batch = Bdownload_cdnlog(accesskey, secretkey, domains, date, savedir,
                                                  successfile, failurefile,
                                                  threadcount)
@@ -419,7 +422,7 @@ class Qcommand(object):
             return print("Login please enter \"qcommand account --help\" for help")
 
     @staticmethod
-    def space(begin, end, g, bucket=None, region=None):
+    def space(begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取标准存储的存储量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -427,13 +430,14 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.bucket_space(begin=begin, end=end, g=g, bucket=bucket, region=region)
+                space.bucket_space(begin=begin, end=end, g=g, bucket=bucket, region=region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -441,7 +445,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def count(begin, end, g, bucket=None, region=None):
+    def count(begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取标准存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -449,13 +453,14 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.bucket_count(begin=begin, end=end, g=g, bucket=bucket, region=region)
+                space.bucket_count(begin=begin, end=end, g=g, bucket=bucket, region=region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -463,7 +468,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def spaceline(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+    def spaceline(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False, outfile=None):
         """
         获取低频存储的当前存储量。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -473,14 +478,15 @@ class Qcommand(object):
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
         no_predel: 除去低频存储提前删除，剩余的存储量。可选参数，默认为 False，包含提前删除存储量。置为True时，不包含提前删除存储量。
         only_predel: 只显示低频存储提前删除的存储量。可选参数，默认为 False，显示所有存储量。置为True时，只显示提前删除存储量。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
                 space.bucket_space_line(begin=begin, end=end, g=g, bucket=bucket, region=region, no_predel=no_predel,
-                                        only_predel=only_predel)
+                                        only_predel=only_predel, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -488,7 +494,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def countline(begin, end, g, bucket=None, region=None):
+    def countline(begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -496,13 +502,14 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.bucket_count_line(begin=begin, end=end, g=g, bucket=bucket, region=region)
+                space.bucket_count_line(begin=begin, end=end, g=g, bucket=bucket, region=region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -510,7 +517,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def spacearchive(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+    def spacearchive(begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False, outfile=None):
         """
         获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -520,14 +527,15 @@ class Qcommand(object):
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
         no_predel: 除去归档存储提前删除，剩余的存储量。可选参数，默认为 False，包含提前删除存储量。置为True时，不包含提前删除存储量。
         only_predel: 只显示归档存储提前删除的存储量。可选参数，默认为 False，显示所有存储量。置为True时，只显示提前删除存储量。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
                 space.bucket_space_archive(begin=begin, end=end, g=g, bucket=bucket, region=region, no_predel=no_predel,
-                                           only_predel=only_predel)
+                                           only_predel=only_predel, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -535,7 +543,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def countarchive(begin, end, g, bucket=None, region=None):
+    def countarchive(begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取归档存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -543,13 +551,14 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         bucket: 存储空间名称，是一个条件请求参数。可选参数，不指定默认获取所有。
         region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.bucket_count_archive(begin=begin, end=end, g=g, bucket=bucket, region=region)
+                space.bucket_count_archive(begin=begin, end=end, g=g, bucket=bucket, region=region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -557,7 +566,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def blobtransfer(begin, end, g, is_oversea=None, taskid=None):
+    def blobtransfer(begin, end, g, is_oversea=None, taskid=None, outfile=None):
         """
         获取跨区域同步流量统计数据。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -565,13 +574,14 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         is_oversea: 是否为海外同步,0 国内,1 海外。可选参数，不填表示查询总跨区域同步流量
         taskid: 任务 id。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.blob_transfer(begin=begin, end=end, g=g, is_oversea=is_oversea, taskid=taskid)
+                space.blob_transfer(begin=begin, end=end, g=g, is_oversea=is_oversea, taskid=taskid, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -579,7 +589,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def rschtype(begin, end, g, new_bucket=None, new_region=None):
+    def rschtype(begin, end, g, new_bucket=None, new_region=None, outfile=None):
         """
         获取存储类型转换请求次数。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -587,13 +597,15 @@ class Qcommand(object):
         g: 时间粒度，支持 day；当天支持5min、hour、day
         new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
         new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.rs_chtype(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region)
+                space.rs_chtype(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region,
+                                outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -601,7 +613,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def rsput(begin, end, g, new_bucket=None, ftype=None, new_region=None):
+    def rsput(begin, end, g, new_bucket=None, ftype=None, new_region=None, outfile=None):
         """
         获取 PUT 请求次数。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -610,13 +622,15 @@ class Qcommand(object):
         new_bucket: 空间名称是一个条件请求参数。可选参数，不指定默认获取所有。
         ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
         new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
-                space.rs_put(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region, ftype=ftype)
+                space.rs_put(begin=begin, end=end, g=g, new_bucket=new_bucket, new_region=new_region, ftype=ftype,
+                             outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -624,7 +638,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def internet_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+    def internet_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None, outfile=None):
         """
         获取外网流出流量。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -634,15 +648,16 @@ class Qcommand(object):
         domain: 空间访问域名。可选参数
         ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
         new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
                 space.internet_traffic_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
                                                ftype=ftype,
-                                               new_region=new_region)
+                                               new_region=new_region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -650,7 +665,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def cdn_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+    def cdn_traffic(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None, outfile=None):
         """
         获取CDN回源流量统计。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -660,15 +675,16 @@ class Qcommand(object):
         domain: 空间访问域名。可选参数
         ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
         new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
                 space.cdn_traffic_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
                                           ftype=ftype,
-                                          new_region=new_region)
+                                          new_region=new_region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:
@@ -676,7 +692,7 @@ class Qcommand(object):
             raise e
 
     @staticmethod
-    def req_num(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None):
+    def req_num(begin, end, g, new_bucket=None, domain=None, ftype=None, new_region=None, outfile=None):
         """
         获取下载请求次数。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
@@ -686,15 +702,16 @@ class Qcommand(object):
         domain: 空间访问域名。可选参数
         ftype: 存储类型，0 标准存储，1 低频存储，2 归档存储。可选参数，不指定默认获取所有
         new_region: 存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。
+        outfile: 查询结果保存位置，可选参数。默认直接打印显示。
         """
         try:
-            if os.path.exists(account_file):
+            if exists(account_file):
                 access_key, secret_key = read_account()
                 auth = QiniuMacAuth(access_key, secret_key)
                 space = bucket_Btatistic(auth)
                 space.req_num_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
                                       ftype=ftype,
-                                      new_region=new_region)
+                                      new_region=new_region, outfile=outfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:

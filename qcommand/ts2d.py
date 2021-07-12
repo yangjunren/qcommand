@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import time
+from time import strftime, localtime
 
 
 def ts2d(timestamp):
-    timeArray = time.localtime(int(str(timestamp)[:10]))
-    date = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    timeArray = localtime(int(str(timestamp)[:10]))
+    date = strftime("%Y-%m-%d %H:%M:%S", timeArray)
     return date

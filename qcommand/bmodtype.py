@@ -2,11 +2,12 @@
 # flake8: noqa
 from qiniu import Auth
 from qiniu import BucketManager
-import time, logging
+from time import sleep
+from logging import getLogger
 from command_threadpool import SimpleThreadPool
 from util import to_unicode
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class Batch_modtype(object):
@@ -31,7 +32,7 @@ class Batch_modtype(object):
             return key, info, successfile, failurefile
         except Exception as e:
             logger.warn(to_unicode(e))
-            time.sleep(0.1)
+            sleep(0.1)
 
     def read_inputfile(self, inputfile):
         with open(inputfile, "r") as f:

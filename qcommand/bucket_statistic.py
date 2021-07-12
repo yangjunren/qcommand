@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 from qiniu import http, config, QiniuMacAuth
-import time
+from time import localtime, strftime
+from util import write_file
+from os.path import exists, dirname
 
 
 class bucket_Btatistic(object):
@@ -9,49 +11,77 @@ class bucket_Btatistic(object):
         self.auth = auth
 
     def timestamp2date(self, timeStamp):
-        timeArray = time.localtime(timeStamp)
-        otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+        timeArray = localtime(timeStamp)
+        otherStyleTime = strftime("%Y-%m-%d %H:%M:%S", timeArray)
         return otherStyleTime
 
-    def space_ret_info(self, ret, info):
+    def space_ret_info(self, ret, info, outfile):
         if ret and info.status_code == 200:
             time_key = ret["times"]
             data_value = ret["datas"]
             data = dict(zip(time_key, data_value))
             for key, value in data.items():
-                print("{0}: {1} GB".format(self.timestamp2date(key), (value / 1024 / 1024 / 1024)))
+                data = "{0}: {1} GB".format(self.timestamp2date(key), (value / 1024 / 1024 / 1024))
+                if outfile:
+                    if exists(dirname(outfile)):
+                        write_file(outfile, "{0}\n".format(data))
+                    else:
+                        return "{0} not not exist".format(outfile)
+                else:
+                    print(data)
         else:
             print(info)
 
-    def count_ret_info(self, ret, info):
+    def count_ret_info(self, ret, info, outfile):
         if ret and info.status_code == 200:
             time_key = ret["times"]
             data_value = ret["datas"]
             data = dict(zip(time_key, data_value))
             for key, value in data.items():
-                print("{0}: {1} 个文件".format(self.timestamp2date(key), value))
+                data = "{0}: {1} GB".format(self.timestamp2date(key), (value / 1024 / 1024 / 1024))
+                if outfile:
+                    if exists(dirname(outfile)):
+                        write_file(outfile, "{0}\n".format(data))
+                    else:
+                        return "{0} not not exist".format(outfile)
+                else:
+                    print(data)
         else:
             print(info)
 
-    def blob_put_ret_info(self, ret, info, select):
+    def blob_put_ret_info(self, ret, info, select, outfile):
         if ret and info.status_code == 200:
             for i in ret:
                 time_key = i["time"]
                 size_value = i["values"][select]
-                print("{0}: {1} GB".format(time_key, (size_value / 1024 / 1024 / 1024)))
+                data = "{0}: {1} GB".format(self.timestamp2date(time_key), (size_value / 1024 / 1024 / 1024))
+                if outfile:
+                    if exists(dirname(outfile)):
+                        write_file(outfile, "{0}\n".format(data))
+                    else:
+                        return "{0} not not exist".format(outfile)
+                else:
+                    print(data)
         else:
             print(info)
 
-    def blob_put_count_ret_info(self, ret, info, select):
+    def blob_put_count_ret_info(self, ret, info, select, outfile):
         if ret and info.status_code == 200:
             for i in ret:
                 time_key = i["time"]
                 size_value = i["values"][select]
-                print("{0}: {1} 次".format(time_key, size_value))
+                data = "{0}: {1} GB".format(self.timestamp2date(time_key), (size_value / 1024 / 1024 / 1024))
+                if outfile:
+                    if exists(dirname(outfile)):
+                        write_file(outfile, "{0}\n".format(data))
+                    else:
+                        return "{0} not not exist".format(outfile)
+                else:
+                    print(data)
         else:
             print(info)
 
-    def bucket_space(self, begin, end, g, bucket=None, region=None):
+    def bucket_space(self, begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取标准存储的存储量统计
         https://developer.qiniu.com/kodo/3908/statistic-space
@@ -59,9 +89,9 @@ class bucket_Btatistic(object):
         url = "{0}/v6/space".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, bucket=bucket, region=region)
         ret, info = self.__get(url, options)
-        self.space_ret_info(ret, info)
+        self.space_ret_info(ret, info, outfile)
 
-    def bucket_count(self, begin, end, g, bucket=None, region=None):
+    def bucket_count(self, begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取标准存储的文件数量统计
         https://developer.qiniu.com/kodo/3914/count
@@ -69,9 +99,10 @@ class bucket_Btatistic(object):
         url = "{0}/v6/count".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, bucket=bucket, region=region)
         ret, info = self.__get(url, options)
-        self.count_ret_info(ret, info)
+        self.count_ret_info(ret, info, outfile)
 
-    def bucket_space_line(self, begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+    def bucket_space_line(self, begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False,
+                          outfile=None):
         """
         获取低频存储的存储量统计
         https://developer.qiniu.com/kodo/3910/space-line
@@ -80,9 +111,9 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, bucket=bucket, region=region, no_predel=no_predel,
                                      only_predel=only_predel)
         ret, info = self.__get(url, options)
-        self.space_ret_info(ret, info)
+        self.space_ret_info(ret, info, outfile)
 
-    def bucket_count_line(self, begin, end, g, bucket=None, region=None):
+    def bucket_count_line(self, begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取低频存储的文件数量统计
         https://developer.qiniu.com/kodo/3915/count-line
@@ -90,9 +121,10 @@ class bucket_Btatistic(object):
         url = "{0}/v6/count_line".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, bucket=bucket, region=region)
         ret, info = self.__get(url, options)
-        self.count_ret_info(ret, info)
+        self.count_ret_info(ret, info, outfile)
 
-    def bucket_space_archive(self, begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False):
+    def bucket_space_archive(self, begin, end, g, bucket=None, region=None, no_predel=False, only_predel=False,
+                             outfile=None):
         """
         获取归档存储的存储量统计
         https://developer.qiniu.com/kodo/6462/space-archive
@@ -101,9 +133,9 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, bucket=bucket, region=region, no_predel=no_predel,
                                      only_predel=only_predel)
         ret, info = self.__get(url, options)
-        self.space_ret_info(ret, info)
+        self.space_ret_info(ret, info, outfile)
 
-    def bucket_count_archive(self, begin, end, g, bucket=None, region=None):
+    def bucket_count_archive(self, begin, end, g, bucket=None, region=None, outfile=None):
         """
         获取归档存储的文件数量统计
         https://developer.qiniu.com/kodo/6463/count-archive
@@ -111,9 +143,9 @@ class bucket_Btatistic(object):
         url = "{0}/v6/count_archive".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, bucket=bucket, region=region)
         ret, info = self.__get(url, options)
-        self.count_ret_info(ret, info)
+        self.count_ret_info(ret, info, outfile)
 
-    def blob_transfer(self, begin, end, g, select="size", is_oversea=None, taskid=None):
+    def blob_transfer(self, begin, end, g, select="size", is_oversea=None, taskid=None, outfile=None):
         """
         获取跨区域同步流量统计数据。可查询当天计量，监控统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3911/blob-transfer
@@ -121,9 +153,9 @@ class bucket_Btatistic(object):
         url = "{0}/v6/blob_transfer".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, select=select, is_oversea=is_oversea, taskid=taskid)
         ret, info = self.__get(url, options)
-        self.blob_put_ret_info(ret, info, select)
+        self.blob_put_ret_info(ret, info, select, outfile)
 
-    def rs_chtype(self, begin, end, g, select="hits", new_bucket=None, new_region=None):
+    def rs_chtype(self, begin, end, g, select="hits", new_bucket=None, new_region=None, outfile=None):
         """
         获取存储类型转换请求次数。可查询当天计量，监控统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3913/rs-chtype
@@ -131,11 +163,10 @@ class bucket_Btatistic(object):
         url = "{0}/v6/rs_chtype".format(config.get_default('default_api_host'))
         options = self.__get_options(begin, end, g, select=select, new_bucket=new_bucket, new_region=new_region)
         ret, info = self.__get(url, options)
-        self.blob_put_count_ret_info(ret, info, select)
+        self.blob_put_count_ret_info(ret, info, select, outfile)
 
     def internet_traffic_blob_io(self, begin, end, g, select="flow", src="origin", new_bucket=None, domain=None,
-                                 ftype=None,
-                                 new_region=None):
+                                 ftype=None, new_region=None, outfile=None):
         """
         获取外网流出流量。可查询当天计量，统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3908/statistic-space
@@ -144,12 +175,10 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, select=select, src=src, new_bucket=new_bucket,
                                      new_region=new_region, domain=domain, ftype=ftype)
         ret, info = self.__get(url, options)
-        self.blob_put_ret_info(ret, info, select)
+        self.blob_put_ret_info(ret, info, select, outfile)
 
     def cdn_traffic_blob_io(self, begin, end, g, select="flow", src="!origin&$src=!atlab&$src=!inner&$src=!ex",
-                            new_bucket=None, domain=None,
-                            ftype=None,
-                            new_region=None):
+                            new_bucket=None, domain=None, ftype=None, new_region=None, outfile=None):
         """
         获取CDN回源流量统计。可查询当天计量，统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3908/statistic-space
@@ -158,12 +187,10 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, select=select, src=src, new_bucket=new_bucket,
                                      new_region=new_region, domain=domain, ftype=ftype)
         ret, info = self.__get(url, options)
-        self.blob_put_ret_info(ret, info, select)
+        self.blob_put_ret_info(ret, info, select, outfile)
 
     def req_num_blob_io(self, begin, end, g, select="hits", src="origin&$src=inner",
-                        new_bucket=None, domain=None,
-                        ftype=None,
-                        new_region=None):
+                        new_bucket=None, domain=None, ftype=None, new_region=None, outfile=None):
         """
         获取下载请求次数。可查询当天计量，统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3908/statistic-space
@@ -172,9 +199,9 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, select=select, src=src, new_bucket=new_bucket,
                                      new_region=new_region, domain=domain, ftype=ftype)
         ret, info = self.__get(url, options)
-        self.blob_put_count_ret_info(ret, info, select)
+        self.blob_put_count_ret_info(ret, info, select, outfile)
 
-    def rs_put(self, begin, end, g, select="hits", new_bucket=None, ftype=None, new_region=None):
+    def rs_put(self, begin, end, g, select="hits", new_bucket=None, ftype=None, new_region=None, outfile=None):
         """
         获取 PUT 请求次数。可查询当天计量，统计延迟大概 5 分钟。
         https://developer.qiniu.com/kodo/3912/rs-put
@@ -183,7 +210,7 @@ class bucket_Btatistic(object):
         options = self.__get_options(begin, end, g, select=select, new_bucket=new_bucket,
                                      new_region=new_region, ftype=ftype)
         ret, info = self.__get(url, options)
-        self.blob_put_count_ret_info(ret, info, select)
+        self.blob_put_count_ret_info(ret, info, select, outfile)
 
     def __get(self, url, params=None):
         return http._get_with_qiniu_mac(url, params, self.auth)

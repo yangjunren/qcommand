@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 from qiniu import Auth
-import logging, requests, os, urllib3
+from requests import get
+from os.path import dirname, exists, getsize, isdir, basename
+from os import chdir, makedirs, remove, rename
+from logging import getLogger
+from urllib3 import disable_warnings, exceptions
 from urllib.parse import urlparse, quote
 from command_threadpool import SimpleThreadPool
 from util import to_unicode
-import httpx, tempfile, asyncio
+from httpx import stream
+from tempfile import NamedTemporaryFile
 from tqdm import tqdm
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class Batch_download(object):
@@ -20,7 +25,7 @@ class Batch_download(object):
         return private_url
 
     def check_local_filename(self, local_filename):
-        local_filename_path = os.path.dirname(local_filename)
+        local_filename_path = dirname(local_filename)
         # r_path = re.sub(r'\W+', '/', local_filename_path)
         return local_filename_path.lstrip("/")
 
@@ -29,14 +34,14 @@ class Batch_download(object):
         return file_name
 
     def get_totalsize(self, url):
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        rt = requests.get(url, stream=True, verify=False)
+        disable_warnings(exceptions.InsecureRequestWarning)
+        rt = get(url, stream=True, verify=False)
         total_size = int(rt.headers['Content-Length'])
         return total_size
 
     def get_tmpsize(self, tmp_filename):
-        if os.path.exists(tmp_filename):
-            self.size = os.path.getsize(tmp_filename)
+        if exists(tmp_filename):
+            self.size = getsize(tmp_filename)
         else:
             self.size = 0
         return self.size
@@ -49,8 +54,8 @@ class Batch_download(object):
         return finished
 
     def async_downloadProgress(self, file_url, total_size):
-        with tempfile.NamedTemporaryFile() as download_file:
-            with httpx.stream("GET", file_url) as response:
+        with NamedTemporaryFile() as download_file:
+            with stream("GET", file_url) as response:
                 with tqdm(total=total_size, unit_scale=True, unit_divisor=1024, unit="B", desc=file_url) as progress:
                     num_bytes_downloaded = response.num_bytes_downloaded
                     for chunk in response.iter_bytes():
@@ -86,26 +91,26 @@ class Batch_download(object):
             logger.warn(e)
 
     def simple_download(self, file_url, filename, save_path, headers, successfile, failurefile):
-        if os.path.isdir(save_path):
-            os.chdir(save_path)
-            if os.path.exists(filename):
+        if isdir(save_path):
+            chdir(save_path)
+            if exists(filename):
                 pass
             else:
                 try:
                     local_filename_path = self.check_local_filename(filename)
                     filename = filename.strip("/")
-                    with tempfile.NamedTemporaryFile() as download_file:
-                        with httpx.stream("GET", file_url, headers=headers) as f_response:
+                    with NamedTemporaryFile() as download_file:
+                        with stream("GET", file_url, headers=headers) as f_response:
                             total_size = int(f_response.headers["Content-Length"])
                             with tqdm(total=total_size, unit_scale=True, unit_divisor=1024, unit="B",
                                       desc=file_url) as progress:
                                 if f_response.status_code == 200:
                                     if local_filename_path:
-                                        if os.path.exists(local_filename_path):
+                                        if exists(local_filename_path):
                                             status_code = self.simple_write_download_file(f_response, filename,
                                                                                           download_file, progress)
                                         else:
-                                            os.makedirs(local_filename_path, 0o755)
+                                            makedirs(local_filename_path, 0o755)
                                             status_code = self.simple_write_download_file(f_response, filename,
                                                                                           download_file, progress)
                                     else:
@@ -120,9 +125,9 @@ class Batch_download(object):
             return print("{0} not exists".format(save_path))
 
     def asycnc_download(self, file_url, filename, save_path, headers, successfile, failurefile):
-        if os.path.isdir(save_path):
-            os.chdir(save_path)
-            if os.path.exists(filename):
+        if isdir(save_path):
+            chdir(save_path)
+            if exists(filename):
                 pass
             else:
                 try:
@@ -131,22 +136,22 @@ class Batch_download(object):
                     total_size = self.get_totalsize(file_url)
                     local_filename_path = self.check_local_filename(filename)
                     if total_size < temp_size:
-                        os.remove(tmp_filename)
+                        remove(tmp_filename)
                         headers["Range"] = "bytes=0-"
                     else:
                         headers["Range"] = "bytes={0}-".format(temp_size)
-                    with httpx.stream('GET', file_url, headers=headers) as f_response:
+                    with stream('GET', file_url, headers=headers) as f_response:
                         if f_response.status_code == 200 or f_response.status_code == 206:
-                            if os.path.exists(tmp_filename):
+                            if exists(tmp_filename):
                                 self.async_write_download_file(file_url, f_response, tmp_filename, total_size,
                                                                temp_size)
                             else:
                                 if local_filename_path:
-                                    if os.path.exists(local_filename_path):
+                                    if exists(local_filename_path):
                                         self.async_write_download_file(file_url, f_response, tmp_filename, total_size,
                                                                        temp_size)
                                     else:
-                                        os.makedirs(local_filename_path, 0o755)
+                                        makedirs(local_filename_path, 0o755)
                                         self.async_write_download_file(file_url, f_response, tmp_filename, total_size,
                                                                        temp_size)
                                 else:
@@ -155,13 +160,13 @@ class Batch_download(object):
                 except Exception as e:
                     return print("\nDownload pause.\n")
                 finally:
-                    local_filename = os.path.basename(self.filter_name(file_url))
+                    local_filename = basename(self.filter_name(file_url))
                     tmp_filename = local_filename + ".downtmp"
                     temp_size = self.get_tmpsize(tmp_filename)
                     total_size = self.get_totalsize(file_url)
                     finished = self.check_finished(temp_size, total_size)
                     if finished:
-                        os.rename(tmp_filename, local_filename)
+                        rename(tmp_filename, local_filename)
                     return finished, f_response, filename, save_path, local_filename, successfile, failurefile
         else:
             return print("{0} not exists".format(save_path))

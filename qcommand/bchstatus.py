@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import logging, time
+from logging import getLogger
+from time import sleep
 from qiniu import Auth
 from qiniu import BucketManager
 from command_threadpool import SimpleThreadPool
 from util import to_unicode
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class Batch_chstatus(object):
@@ -39,7 +40,7 @@ class Batch_chstatus(object):
             return key, info, successfile, failurefile
         except Exception as e:
             logger.warn(to_unicode(e))
-            time.sleep(0.1)
+            sleep(0.1)
 
     def batch_chstatus(self):
         self._inner_threadpool = SimpleThreadPool(self.thread_count)

@@ -2,12 +2,12 @@
 # flake8: noqa
 
 from qiniu import Auth, BucketManager
-import time, logging
-
+from time import sleep
+from logging import getLogger
 from command_threadpool import SimpleThreadPool
 from util import to_unicode
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class Batch_delete(object):
@@ -40,7 +40,7 @@ class Batch_delete(object):
             return key, info, successfile, failurefile
         except Exception as e:
             logger.warn(to_unicode(e))
-            time.sleep(0.1)
+            sleep(0.1)
 
     def batch_delete(self):
         self._inner_threadpool = SimpleThreadPool(self.thread_count)

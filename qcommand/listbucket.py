@@ -2,7 +2,6 @@
 # flake8: noqa
 from qiniu import Auth
 from qiniu import BucketManager
-from util import date2timestamp
 import logging
 
 logger = logging.getLogger("qcommand")

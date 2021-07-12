@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import m3u8, logging
+from m3u8 import load
+from logging import getLogger
 from urllib.parse import quote
 from bdownload import Batch_download
 from command_threadpool import SimpleThreadPool
 from util import to_unicode
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class B_m3u8_download(object):
@@ -25,7 +26,7 @@ class B_m3u8_download(object):
         self.failurefile = failurefile
 
     def get_ts_list(self, file_url):
-        ts_list = m3u8.load(file_url)
+        ts_list = load(file_url)
         return ts_list.files
 
     def file_url(self, filename):

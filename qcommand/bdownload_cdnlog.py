@@ -4,10 +4,10 @@ from qiniu import CdnManager, Auth
 from util import write_file, to_unicode
 from bdownload import Batch_download
 from command_threadpool import SimpleThreadPool
-import logging
+from logging import getLogger
 from os import mkdir, path, chdir, rename
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 _cdnlog_fileinfo = []
 

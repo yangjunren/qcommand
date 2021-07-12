@@ -4,7 +4,7 @@ from threading import Thread
 from logging import getLogger
 from six.moves.queue import Queue
 from threading import Lock
-import time
+from time import sleep
 from util import write_file
 from qiniu import Auth
 from qiniu import BucketManager
@@ -127,7 +127,7 @@ class SimpleThreadPool:
 
     def release(self):
         while self._queue.empty() is False:
-            time.sleep(5)
+            sleep(5)
 
     def wait_completion(self):
         self._queue.join()
@@ -169,7 +169,7 @@ if __name__ == '__main__':
             return info
         except Exception as e:
             logger.warn(e)
-            time.sleep(0.01)
+            sleep(0.01)
 
 
     pool.add_task(mod_type, access_key, secret_key, bucket_name, key, storage_type)

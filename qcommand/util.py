@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import logging, time
+from logging import getLogger
 from six import binary_type
+from time import strptime, mktime
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 def to_unicode(s):
@@ -26,6 +27,6 @@ def write_file(file_path, ret_info):
 
 
 def date2timestamp(date):
-    timeArray = time.strptime(date, "%Y-%m-%d")
-    timeStamp = int(time.mktime(timeArray))
+    timeArray = strptime(date, "%Y-%m-%d")
+    timeStamp = int(mktime(timeArray))
     return timeStamp

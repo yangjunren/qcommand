@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-import lmdb, os, logging
+import lmdb
 from account import Account
+from logging import getLogger
+from os import chdir
 from command_global import home_path
 
-logger = logging.getLogger("qcommand")
+logger = getLogger("qcommand")
 
 
 class User(object):
@@ -34,7 +36,7 @@ class User(object):
                 txn = env.begin()
                 val = txn.get(self.name.encode()).decode()
                 re = val.split(":")
-                os.chdir("{0}/.qcommand".format(home_path))
+                chdir("{0}/.qcommand".format(home_path))
                 Account.account_config(self.name, re[0], re[1])
                 ret = "\nName:{0}\naccesskey:{1}\nsecretkey:{2}\n".format(self.name, re[0], re[1])
                 env.close()
