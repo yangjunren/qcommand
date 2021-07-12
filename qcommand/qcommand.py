@@ -581,7 +581,7 @@ class Qcommand(object):
     @staticmethod
     def rschtype(begin, end, g, new_bucket=None, new_region=None):
         """
-        获取存储类型请求次数统计。可查询当天计量，统计延迟大概 5 分钟。
+        获取存储类型转换请求次数。可查询当天计量，统计延迟大概 5 分钟。
         begin: 起始日期字符串，闭区间，例如： 20060102150405
         end: 结束日期字符串，开区间，例如： 20060102150405
         g: 时间粒度，支持 day；当天支持5min、hour、day

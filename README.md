@@ -80,6 +80,18 @@ qcommand account <name> <ak> <sk>
 | bdownload   | 下载   | 批量下载空间文件                                                          | [文档](docs/bdownload.md)    |
 | bm3u8       | 下载   | 批量下载m3u8文件及其ts文件                                                 | [文档](docs/bm3u8.md)        |
 | bcdnlog     | 下载   | 批量下载CDN日志                                                           | [文档](docs/bcdnlog.md)      |
+| space       | 查询   | 获取标准存储的存储量统计。可查询当天计量，统计延迟大概 5 分钟。                   | [文档](docs/space.md)        |
+| count       | 查询   | 获取标准存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。                 | [文档](docs/count.md)         |
+| spaceline   | 查询   | 获取低频存储的当前存储量。可查询当天计量，统计延迟大概 5 分钟。                   | [文档](docs/spaceline.md)    |
+| countline   | 查询   | 获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。                 | [文档](docs/countline.md)    |
+| spacearchive| 查询   | 获取低频存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。                 |[文档](docs/spacearchive.md)  |
+| countarchive| 查询   | 获取归档存储的文件数量统计。可查询当天计量，统计延迟大概 5 分钟。                 |[文档](docs/countarchive.md)  |
+| blobtransfer| 查询   | 获取跨区域同步流量统计数据。可查询当天计量，统计延迟大概 5 分钟。                 |[文档](docs/blobtransfer.md)  |
+| rschtype    | 查询   | 获取存储类型转换请求次数。可查询当天计量，统计延迟大概 5 分钟。                   |[文档](docs/rschtype.md)      |
+| rsput       | 查询   | 获取 PUT 请求次数。可查询当天计量，统计延迟大概 5 分钟。                        | [文档](docs/rsput.md)        |
+| internet_traffic| 查询| 获取外网流出流量。可查询当天计量，统计延迟大概 5 分钟。                         |[文档](docs/internet_traffic.md)|
+| cdn_traffic | 查询   | 获取CDN回源流量统计。可查询当天计量，统计延迟大概 5 分钟。                       | [文档](docs/cdn_traffic.md)  |
+| req_num     | 查询   | 获取下载请求次数。可查询当天计量，统计延迟大概 5 分钟。                          |[文档](docs/req_num.md)       |
 
 ## 其他命令
 | 命令         | 描述                                                                     | 详细                         |
