@@ -23,6 +23,7 @@ qcommand spacearchive <begin> <end> <g> [--bucket= --region= --no_predel= --only
 |region|存储区域，z0 华东，z1 华北，z2 华南，na0 北美，as0 东南亚，cn-east-2 华东-浙江2。可选参数，不指定默认获取所有。|
 |no_predel|除去归档存储提前删除，剩余的存储量。可选参数，默认为 False，包含提前删除存储量。置为True时，不包含提前删除存储量。|
 |only_predel|只显示归档存储提前删除的存储量。可选参数，默认为 False，显示所有存储量。置为True时，只显示提前删除存储量。|
+|outfile| 查询结果保存位置，可选参数。默认直接打印显示。|
 
 # 示例
 

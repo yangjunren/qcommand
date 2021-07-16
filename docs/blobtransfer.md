@@ -21,6 +21,7 @@ qcommand blobtransfer <begin> <end> <g> [--is_oversea= --taskid= ]
 |g|时间粒度，支持 day；当天支持5min、hour、day|
 |is_oversea|是否为海外同步,0 国内,1 海外。可选参数，不填表示查询总跨区域同步流量.|
 |taskid|任务 id。|
+|outfile| 查询结果保存位置，可选参数。默认直接打印显示。|
 
 
 # 示例

@@ -20,8 +20,10 @@ from b_m3u8_download import B_m3u8_download
 from bdownload_cdnlog import Bdownload_cdnlog
 from ts2d import ts2d
 from uploadtoken import upload_token
-from qiniu import QiniuMacAuth
+from qiniu import QiniuMacAuth, Auth
 from bucket_statistic import bucket_Btatistic
+from restoreAr import file_restoreAr
+from brestoreAr import Batch_restore
 
 logger = getLogger("qcommand")
 
@@ -712,6 +714,47 @@ class Qcommand(object):
                 space.req_num_blob_io(begin=begin, end=end, g=g, new_bucket=new_bucket, domain=domain,
                                       ftype=ftype,
                                       new_region=new_region, outfile=outfile)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def restore(bucket, key, days):
+        """
+        解冻单个归档文件
+        bucket: 归档文件所在空间
+        key: 需要解冻的文件名
+        days: 解冻时长，单位天，范围 1-7
+        """
+        try:
+            if exists(account_file):
+                access_key, secret_key = read_account()
+                file_restoreAr(access_key, secret_key, bucket, key, days)
+            else:
+                return print("Login please enter \"qcommand account --help\" for help")
+        except Exception as e:
+            logger.warn(e)
+            raise e
+
+    @staticmethod
+    def brestore(bucket, inputfile, days=7, resfile=None):
+        """
+        批量解冻 归档文件
+        bucket: 归档文件所在空间
+        inputfile: 包含归档文件名的 txt文件
+        days: 解冻时长，单位天，范围 1-7，可选参数，默认解冻时长为7天。
+        resfile: 处理结果保存文件路径，可选参数。默认保存在qcommand运行目录，文件名为 resfile_{bucket}.txt。
+        """
+        try:
+            if exists(account_file):
+                access_key, secret_key = read_account()
+                auth = Auth(access_key, secret_key)
+                batch_restore = Batch_restore(auth)
+                if resfile is None:
+                    resfile = "./resfile_{0}.txt".format(bucket)
+                batch_restore.batch_restore(bucket, inputfile, days, resfile)
             else:
                 return print("Login please enter \"qcommand account --help\" for help")
         except Exception as e:

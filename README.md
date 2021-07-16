@@ -17,6 +17,7 @@ qcommand 工具使用python3实现的一个方便使用七牛API服务的命令�
 |v0.0 | kodo、cdn相关命令|[下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.0/mac_os/qcommand)|
 |v0.1| 新增 kodo 数据统计查询命令 |[下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.1/mac_os/qcommand)|
 |v0.2| 新增 kodo 数据统计查询 结果导出功能| [下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.2/mac_os/qcommand)|
+|v0.3| 新增 kodo 归档文件解冻操作| [下载](https://github.com/yangjunren/qcommand/blob/main/releases/v0.3/mac_os/qcommand)|
 
 ## 安装
 
@@ -98,6 +99,8 @@ qcommand account <name> <ak> <sk>
 | internet_traffic| 查询| 获取外网流出流量。可查询当天计量，统计延迟大概 5 分钟。                         |[文档](docs/internet_traffic.md)|
 | cdn_traffic | 查询   | 获取CDN回源流量统计。可查询当天计量，统计延迟大概 5 分钟。                       | [文档](docs/cdn_traffic.md)  |
 | req_num     | 查询   | 获取下载请求次数。可查询当天计量，统计延迟大概 5 分钟。                          |[文档](docs/req_num.md)       |
+| restore     | 解冻   | 解冻单个归档文件                                                           |[文档](docs/restore.md)       |
+| brestore    | 解冻   | 批量解冻 归档文件                                                          |[文档](docs/brestore.md)       |
 
 ## 其他命令
 | 命令         | 描述                                                                     | 详细                         |
