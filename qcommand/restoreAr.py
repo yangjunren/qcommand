@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
-from qiniu import Auth, BucketManager, build_batch_restoreAr
+from qiniu import Auth, BucketManager
 from logging import getLogger
-from itertools import takewhile, repeat
-from json import loads
-from util import write_file
 
 logger = getLogger("qcommand")
 
